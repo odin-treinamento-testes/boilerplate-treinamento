@@ -1,0 +1,19 @@
+# Config local do Claude (não versionar)
+.claude/settings.local.json
+.claude/memory/
+
+# Segredos e ambiente
+.env
+.env.*
+*.key
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Arquivo pessoal do Claude Code: nunca versionar
+CLAUDE.local.md

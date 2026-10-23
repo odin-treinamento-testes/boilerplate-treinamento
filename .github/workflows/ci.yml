@@ -1,0 +1,47 @@
+# =============================================================================
+# CI: contrato e conselho.
+#
+# O job `contrato` BARRA o merge e é o único que a regra de CI da organização deve
+# exigir. Ele só verifica o que, se quebrar, quebra o projeto sem ninguém perceber:
+# a estrutura essencial, o plugin do núcleo no .claude/settings.json, dados do
+# cliente e segredos fora do git e as skills que o Claude Code consegue carregar.
+#
+# O job `conselho` SÓ AVISA: estrutura recomendada e convenções. Aparece como aviso
+# no PR e não impede o merge.
+#
+# Quem decide flexibilizar o escopo é o coordenador, ao aprovar o PR: o CI barra o
+# que quebra e mostra o resto para ele decidir. Detalhe em tools/check_estrutura.py,
+# que é o mesmo script que você roda localmente.
+# =============================================================================
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contrato:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Estrutura essencial, plugin do núcleo, dados e segredos fora do git, skills
+        run: python3 tools/check_estrutura.py
+
+  conselho:
+    name: conselho (só avisa)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Estrutura recomendada e convenções
+        run: python3 tools/check_estrutura.py --conselho
