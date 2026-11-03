@@ -1,0 +1,27 @@
+# =============================================================================
+# ARQUIVO GERADO — NÃO EDITE
+#
+# Gerado por tools/gen_conda.py a partir do pyproject.toml, que é a FONTE ÚNICA
+# de dependências (Decisão 2 / Rule 02). Qualquer edição manual será perdida na
+# próxima geração e o CI acusa manifesto fora de sync (Rule 03).
+#
+# Para alterar dependências:
+#   1. edite o pyproject.toml
+#   2. rode: uv run python tools/gen_conda.py
+#   3. commite os dois juntos
+# =============================================================================
+
+name: esqueleto-ciencia-de-dados
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - mlflow>=2.14
+      - numpy>=1.26
+      - pandas>=2.2
+      - pyarrow>=16
+      - pydantic>=2.7
+      - pyyaml>=6.0
+      - scikit-learn>=1.5

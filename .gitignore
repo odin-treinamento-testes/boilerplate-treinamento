@@ -1,19 +1,68 @@
-# Config local do Claude (não versionar)
-.claude/settings.local.json
-.claude/memory/
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.installed.cfg
+*.egg
 
-# Segredos e ambiente
+# --- Ambientes virtuais ---
+.venv/
+venv/
+env/
+ENV/
+
+# --- uv ---
+# uv.lock É versionado (fonte única de dependências). Não ignorar.
+.uv_cache/
+
+# --- Caches / ferramentas ---
+.cache/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.coverage
+.coverage.*
+htmlcov/
+
+# --- MLflow ---
+mlruns/
+mlartifacts/
+mlflow.db
+mlflow.db-journal
+
+# --- Dados ---
+pipeline/data/raw/
+pipeline/data/interim/
+pipeline/data/processed/
+pipeline/data/external/
+*.parquet
+*.csv
+*.feather
+
+# --- Segredos / ambiente ---
 .env
 .env.*
+!.env.example
+*.pem
 *.key
 
-# Python
-.venv/
-__pycache__/
-*.pyc
+# --- Notebooks pesados / outputs ---
+*.ckpt
+*.pkl
+*.joblib
+*.h5
 
-# macOS
+# --- SO / editores ---
 .DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
 
 # Arquivo pessoal do Claude Code: nunca versionar
 CLAUDE.local.md

@@ -43,22 +43,33 @@ CONTRATO = {
     ".github/CODEOWNERS": "sem ele, a aprovação do coordenador deixa de ser obrigatória",
     "context/README.md": "é o índice do context/, por onde a equipe acha as decisões",
     "context/99_conclusoes": "é dali que sai o cadastro do projeto na KB, no encerramento",
+    "pyproject.toml": "é a fonte única das dependências: sem ele o uv não instala nada",
 }
 # CONSELHO: estrutura recomendada. Faltar gera só aviso.
 CONSELHO = {
     ".claude/README.md": "explica a camada .claude/ para quem chega",
     "context/glossario.md": "guarda os termos do cliente",
+    "context/project-context.md": "resumo vivo do projeto, que as skills de registro atualizam",
     ".claude/rules": "regras do projeto que o Claude Code carrega",
     ".claude/skills": "skills específicas do projeto",
 }
 # Pastas de dados do cliente: nada versionado nelas além de .gitkeep e README.md.
-PASTAS_DE_DADOS: list[str] = []
+PASTAS_DE_DADOS = [
+    "pipeline/data/raw",
+    "pipeline/data/interim",
+    "pipeline/data/processed",
+    "pipeline/data/external",
+]
 # Extensões tratadas como dado do cliente, com os arquivos que são exceção.
 DADOS_POR_EXTENSAO: dict[str, set[str]] = {}
 # Entradas que o .gitignore deveria ter (conselho: o contrato confere o que foi commitado).
-GITIGNORE_RECOMENDADO = [".env", "CLAUDE.local.md", ".claude/settings.local.json"]
-# Lint dos nomes do núcleo nos .md.
-LINT_DE_NOMES = True
+GITIGNORE_RECOMENDADO = [".env", "pipeline/data/raw/", "CLAUDE.local.md"]
+# Limite dos .md de context/, em bytes. Acima dele, o arquivo é dividido em <nome>_pt2.md,
+# <nome>_pt3.md... (conselho: só avisa). O project-context.md é o resumo vivo e fica fora.
+LIMITE_CONTEXTO = 8192
+SEM_LIMITE_CONTEXTO = {"project-context.md"}
+# Lint dos nomes do núcleo nos .md: no CD fica com tools/check_convencoes.py.
+LINT_DE_NOMES = False
 # ================================================================================
 
 NOMES_PROIBIDOS = {
@@ -261,6 +272,21 @@ def checar_conselho(r: Relatorio) -> None:
                 "confunde quem procura a skill.",
                 rel,
             )
+
+    pasta_contexto = RAIZ / "context"
+    if pasta_contexto.is_dir():
+        for caminho in sorted(pasta_contexto.rglob("*.md")):
+            if caminho.name in SEM_LIMITE_CONTEXTO or "checkpoints" in caminho.parts:
+                continue
+            tamanho = caminho.stat().st_size
+            if tamanho > LIMITE_CONTEXTO:
+                r.add(
+                    f"tem {tamanho} bytes, acima do limite de {LIMITE_CONTEXTO} dos arquivos de "
+                    "context/. Divida entre seções: a parte 1 mantém o nome, as seguintes viram "
+                    "<nome>_pt2.md, <nome>_pt3.md..., cada uma com o frontmatter, o H1 com "
+                    "(parte N) e o link para a próxima, e todas entram no README.md da pasta.",
+                    str(caminho.relative_to(RAIZ)),
+                )
 
     if LINT_DE_NOMES:
         for caminho in RAIZ.rglob("*.md"):

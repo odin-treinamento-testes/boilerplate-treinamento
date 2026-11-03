@@ -3,15 +3,22 @@
 #
 # O job `contrato` BARRA o merge e é o único que a regra de CI da organização deve
 # exigir. Ele só verifica o que, se quebrar, quebra o projeto sem ninguém perceber:
-# a estrutura essencial, o plugin do núcleo no .claude/settings.json, dados do
-# cliente e segredos fora do git e as skills que o Claude Code consegue carregar.
+#   - estrutura essencial, plugin do núcleo, dados e segredos fora do git, skills
+#     (tools/check_estrutura.py);
+#   - erros de Python que quebram em execução: sintaxe e nome indefinido (ruff, só
+#     as regras E9, F63, F7 e F82);
+#   - a suíte de testes (pytest);
+#   - o manifesto em sync (Rules 02 e 03): conda.yaml defasado quebra o deploy.
 #
-# O job `conselho` SÓ AVISA: estrutura recomendada e convenções. Aparece como aviso
-# no PR e não impede o merge.
+# O job `conselho` SÓ AVISA: as rules de arquitetura do molde (raiz mínima, MLflow
+# centralizado, plataforma isolada), o estilo (ruff check e ruff format) e as
+# convenções de nome. Aparece como aviso no PR e não impede o merge.
 #
 # Quem decide flexibilizar o escopo é o coordenador, ao aprovar o PR: o CI barra o
-# que quebra e mostra o resto para ele decidir. Detalhe em tools/check_estrutura.py,
-# que é o mesmo script que você roda localmente.
+# que quebra e mostra o resto para ele decidir. As rules de docs/rules/ continuam
+# valendo; o que mudou é que a quebra de uma rule de arquitetura vira conversa no PR,
+# não bloqueio. Os scripts de tools/ são os MESMOS que você roda localmente
+# (python3 tools/check.py).
 # =============================================================================
 name: CI
 
@@ -20,6 +27,7 @@ on:
   push:
     branches: [main]
 
+# Cancela execuções antigas do mesmo ref quando chega um push novo.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -28,20 +36,78 @@ jobs:
   contrato:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.12"
+          enable-cache: true
+
+      - name: Instalar Python + dependências (núcleo, sem extras de plataforma)
+        id: deps
+        run: uv sync
+
+      # Cada verificação roda mesmo se a anterior falhar: você vê tudo de uma vez.
       - name: Estrutura essencial, plugin do núcleo, dados e segredos fora do git, skills
-        run: python3 tools/check_estrutura.py
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: uv run python tools/check_estrutura.py
+
+      - name: Erros de Python que quebram (sintaxe, nome indefinido)
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: uv run ruff check --select E9,F63,F7,F82 --output-format=github .
+
+      - name: pytest
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: uv run pytest
+
+      - name: Manifesto em sync (Rules 02 e 03)
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: uv run python tools/check_manifest.py
 
   conselho:
     name: conselho (só avisa)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.12"
-      - name: Estrutura recomendada e convenções
-        run: python3 tools/check_estrutura.py --conselho
+          enable-cache: true
+
+      - name: Instalar Python + dependências (núcleo, sem extras de plataforma)
+        run: uv sync
+
+      # Nenhum passo daqui falha o job: cada violação vira um aviso no PR.
+      - name: Estrutura recomendada
+        run: uv run python tools/check_estrutura.py --conselho
+
+      - name: ruff check (estilo)
+        run: uv run ruff check --output-format=github --exit-zero . | sed 's/^::error/::warning/'
+
+      - name: ruff format (formatação)
+        run: >-
+          uv run ruff format --check . ||
+          echo "::warning title=Conselho (só avisa)::Arquivos fora do formato do ruff. Rode: uv run ruff format ."
+
+      - name: Raiz mínima (Rule 04)
+        run: >-
+          uv run python tools/check_root.py ||
+          echo "::warning title=Conselho (só avisa)::Raiz mínima (Rule 04): há arquivo novo na raiz. Veja o log deste passo; o coordenador decide no PR."
+
+      - name: MLflow centralizado (Rule 01)
+        run: >-
+          uv run python tools/check_mlflow.py ||
+          echo "::warning title=Conselho (só avisa)::MLflow fora de pipeline/common/tracking.py (Rule 01). Veja o log deste passo; o coordenador decide no PR."
+
+      - name: Plataforma isolada (Rule 06)
+        run: >-
+          uv run python tools/check_platform.py ||
+          echo "::warning title=Conselho (só avisa)::O núcleo importa platform/ (Rule 06). Veja o log deste passo; o coordenador decide no PR."
+
+      - name: Convenções ODIN
+        run: >-
+          uv run python tools/check_convencoes.py ||
+          echo "::warning title=Conselho (só avisa)::Nome fora das convenções ODIN. Veja o log deste passo."

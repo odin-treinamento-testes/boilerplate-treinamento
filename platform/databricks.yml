@@ -1,0 +1,52 @@
+# =============================================================================
+# Databricks Asset Bundle — casca OPCIONAL (toggle = Sim).
+#
+# Este arquivo só existe se o toggle Databricks for Sim; o tools/init.py poda a
+# pasta platform/ inteira quando for Não (Rule 06). O núcleo é IDÊNTICO nos dois
+# casos: nada em models/, common/, config/ ou data/ importa daqui.
+#
+# PREENCHER NA CÓPIA: todos os valores marcados com <PREENCHER: ...> abaixo.
+# Eles são placeholders — o bundle NÃO valida enquanto estiverem assim.
+#
+# Uso:
+#   databricks bundle validate -t dev
+#   databricks bundle deploy -t dev
+#   databricks bundle run treino_exemplo_modelo -t dev
+# =============================================================================
+
+bundle:
+  name: <PREENCHER: nome-do-projeto>   # ex.: previsao-churn
+
+include:
+  - resources/*.yml
+
+# Variáveis reutilizadas pelos resources. Preencha uma vez, use em todo lugar.
+variables:
+  catalogo:
+    description: Catálogo do Unity Catalog usado pelo projeto.
+    default: <PREENCHER: catalogo>
+  schema:
+    description: Schema/database dentro do catálogo.
+    default: <PREENCHER: schema>
+  experiment_path:
+    description: Caminho do experimento MLflow no workspace (convenção Databricks).
+    default: /Shared/<PREENCHER: nome-do-projeto>
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: <PREENCHER: https://adb-XXXXXXXXXXXX.XX.azuredatabricks.net>
+      root_path: /Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+
+  prod:
+    mode: production
+    workspace:
+      host: <PREENCHER: https://adb-XXXXXXXXXXXX.XX.azuredatabricks.net>
+      root_path: /Shared/.bundle/${bundle.name}/${bundle.target}
+    permissions:
+      - level: CAN_MANAGE
+        group_name: <PREENCHER: grupo-responsavel>
+    run_as:
+      service_principal_name: <PREENCHER: service-principal-id>
