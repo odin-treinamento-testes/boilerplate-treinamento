@@ -1,0 +1,19 @@
+# Dependências do projeto. Instalar com: pip install -r requirements.txt
+# Precisa de biblioteca nova? Adicione aqui (uma por linha) no mesmo PR que a usa.
+
+# dados e modelagem
+pandas>=2.2
+numpy>=1.26
+scikit-learn>=1.5
+joblib>=1.4
+
+# gráficos e notebooks
+matplotlib>=3.8
+seaborn>=0.13
+jupyter>=1.0
+
+# interface web
+streamlit>=1.50
+
+# testes
+pytest>=8.0

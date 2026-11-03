@@ -1,100 +1,157 @@
-# <!-- PREENCHER: nome do projeto -->
+# Manutenção Preditiva – MaBiYama (treinamento de Ciência de Dados)
 
-> **Template.** Este README é herdado do esqueleto canônico de projetos de Ciência de
-> Dados do núcleo de dados da PoliJúnior. Os trechos marcados com
-> `<!-- PREENCHER: ... -->` devem ser completados por cada projeto-cópia.
+Repositório-base dos treinamentos de Ciência de Dados do NDados (Poli Júnior). Cada dupla
+de trainees recebe uma cópia dele e desenvolve, em 17 dias úteis, um projeto completo de
+manutenção preditiva para a **MaBiYama**, um cliente **fictício**: da imersão no
+problema até um modelo publicado numa interface web.
 
-> **Treinamento.** Esta é a cópia do `boilerplate-CD` do ODIN para os treinamentos de Ciência de
-> Dados, com três ajustes: o `CODEOWNERS` aponta para o time `validadores` da org, existe
-> `context/sessions/` (onde ficam as sessões e atas das skills do `skills-navegador`) e o
-> `CLAUDE.md` tem um bloco para quem usa o Claude no navegador. O resto é igual ao boilerplate do
-> núcleo, e o `docs/` vale como está. Passo a passo para a equipe: **trilha do trainee** e
-> **setup do ambiente (Windows)** no `manual-treinamento`.
->
-> No Windows, onde este README diz `python3`, use `python`. Sem Databricks: na pergunta do
-> `tools/init.py`, responda **N**.
+> **Objetivo do projeto:** toda manhã, às 05:00, estimar a probabilidade de cada peça de
+> cada máquina falhar até as 06:00 do dia seguinte e entregar à equipe do cliente uma
+> lista de manutenção priorizada.
 
-<!-- PREENCHER: uma frase dizendo o que este projeto faz. -->
+## Comece por aqui
 
-## 👋 Chegou agora? Comece aqui
+1. Leia o [case](documentos-de-apoio/case.md): a situação do cliente, o que foi vendido
+   e as entregas.
+2. Leia o [roteiro](documentos-de-apoio/ROTEIRO.md): as 6 etapas, o que fazer em cada
+   uma e o critério de **pronto**.
+3. Configure o ambiente (seção abaixo).
 
-Se você é analista e nunca viu este padrão, leia o
-**[Guia do Analista](docs/GUIA-DO-ANALISTA.md)** — ele te leva, narrado e sem pressupor
-nada, da cópia do repositório até o primeiro pipeline rodando.
+## Estrutura do repositório
 
-## O que é
-
-Este projeto nasceu como **cópia independente** do esqueleto canônico. A documentação
-está separada pela natureza: o **manual do molde** (como o esqueleto é composto e como
-se mexe nele) mora em [`docs/`](docs/); o **contexto deste projeto** (negócio, dados,
-domínio), preenchido ao longo do tempo, mora em [`.claude/`](.claude/). O ponto de
-entrada único, para IA ou pessoa, é o [`CLAUDE.md`](CLAUDE.md).
-
-## Como começar (a partir do esqueleto)
-
-1. **Copie** o esqueleto para um novo diretório (cópia independente, sem vínculo com o
-   esqueleto original).
-2. **Rode o scaffolder uma única vez** (usa só a stdlib — roda ANTES do `uv sync`):
-   ```bash
-   python3 tools/init.py
-   ```
-   Ele pergunta o toggle Databricks (S/N), poda `platform/` se Não, define o modo dos
-   `pipeline/entrypoints/` e nomeia o projeto. Ao terminar, se autodestrói.
-3. **Instale as dependências:**
-   ```bash
-   uv sync
-   ```
-4. Comece a trabalhar dentro da estrutura pronta. Passo a passo completo na skill
-   [`iniciar-projeto-novo-a-partir-do-esqueleto`](.claude/skills/iniciar-projeto-novo-a-partir-do-esqueleto/SKILL.md).
-
-## Como rodar
-
-O pipeline é dirigido pelo config do modelo (Rule 07). Execução local:
-
-```bash
-uv run python pipeline/entrypoints/run_local.py --config pipeline/config/<modelo>.yaml
-# saída: run_id: ... / métricas: {'accuracy': ..., 'f1': ...}
+```
+.
+├── documentos-de-apoio/
+│   ├── case.md                          # contexto do cliente e escopo vendido
+│   └── ROTEIRO.md                       # as 6 etapas, com checklist e critério de pronto
+├── ETL/
+│   ├── extracao.py                      # leitura da base bruta do cliente
+│   ├── tratamento-geral.py              # limpeza e integração (reprodutível)
+│   └── tratamento-pre-exploratoria.py   # ajustes específicos para a EDA
+├── dados/
+│   ├── extraídos/                       # base bruta, como veio do cliente
+│   └── tratados/                        # base limpa e integrada
+├── notebooks/
+│   ├── 01_analise_exploratoria.ipynb    # Etapa 3 (Report 1)
+│   └── 02_modelagem.ipynb               # Etapa 4
+├── modelos/                             # modelo final treinado
+├── requirements.txt                     # todas as dependências do projeto
+└── .github/
+    ├── CODEOWNERS                       # time de validadores aprova os PRs
+    ├── pull_request_template.md         # checklist de todo PR
+    └── workflows/ci.yml                 # verificações automáticas
 ```
 
-Antes de commitar, rode o mesmo conjunto do CI:
+### Fluxo dos dados
 
-```bash
-python3 tools/check.py     # contrato (barra o merge) + conselho (só avisa)
+```
+dados/extraídos ──► ETL/extracao.py ──► ETL/tratamento-geral.py ──► dados/tratados
+                                                                        │
+                       ETL/tratamento-pre-exploratoria.py ◄─────────────┤
+                                     │                                  │
+                                     ▼                                  ▼
+                  notebooks/01_analise_exploratoria     notebooks/02_modelagem ──► modelos/
+                                                                                     │
+                                                                                     ▼
+                                                                             interface web
 ```
 
-<!-- PREENCHER: se este projeto tem um comando/entrypoint próprio além do acima, descreva-o. -->
+- **`ETL/`** guarda o tratamento em **scripts**, não em notebooks. Pode explorar num
+  notebook, mas a regra de limpeza final mora aqui para poder ser reaplicada a qualquer
+  base nova do cliente.
+- **`notebooks/`** já vem com o esqueleto de cada etapa. Mantenha o layout
+  *título → código → conclusão* em todas as células.
+- **`dados/`** só existe na sua máquina: os arquivos do cliente **nunca** vão para o git
+  (veja [Regras](#regras-do-repositório)).
 
-## CI: o que barra e o que só avisa
+## Configuração do ambiente (uma vez por máquina)
 
-| Job | Verifica | Se falhar |
+Pré-requisitos: Python 3.11 e git.
+
+```bash
+git clone <url-do-repositório-da-sua-equipe>
+cd <pasta-do-repositório>
+
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+
+pip install -r requirements.txt
+```
+
+Depois, coloque os arquivos da base bruta recebidos do cliente em `dados/extraídos/`.
+
+> No macOS/Linux, se `python` não existir, use `python3`.
+
+Precisa de uma biblioteca nova? Adicione-a ao [`requirements.txt`](requirements.txt), uma
+por linha, **no mesmo PR** que passa a usá-la.
+
+## Como trabalhar
+
+1. Crie uma branch para a etapa ou tarefa: `git checkout -b etapa-2-limpeza`.
+2. Desenvolva seguindo o [roteiro](documentos-de-apoio/ROTEIRO.md).
+3. Antes de abrir o PR:
+   ```bash
+   python -m pytest
+   ```
+   e rode cada notebook alterado do início ao fim (*Kernel → Restart & Run All*).
+4. Abra o PR para a `main` e preencha o checklist do template.
+5. O PR só entra depois de aprovado pelo time de validadores. **Uma etapa só está pronta
+   quando o PR dela foi aprovado.**
+
+### O que o CI verifica
+
+A cada PR e a cada push na `main`, o GitHub Actions ([`ci.yml`](.github/workflows/ci.yml)):
+
+| Verificação | Se falhar |
+|---|---|
+| Nenhum arquivo `.csv`, `.xlsx` ou `.parquet` versionado | Barra o merge |
+| `python -m pytest` passa | Barra o merge |
+
+## Regras do repositório
+
+- **Dados do cliente nunca entram no git.** O [`.gitignore`](.gitignore) ignora `.csv`,
+  `.xlsx` e `.parquet`, e o CI barra o PR se algum escapar.
+- **Segredos nunca entram no git** (`.env` e afins já estão ignorados).
+- **Limpeza é script, não notebook.** O tratamento final mora em `ETL/`.
+- **Notebooks precisam rodar do zero.** Nada de célula que depende de estado escondido.
+- **Sem vazamento de informação:** nenhuma feature pode usar dado registrado depois das
+  05:00 do dia da previsão.
+- **Toda decisão relevante é registrada** (tratamento escolhido, métrica, validação,
+  modelo) junto da entrega da etapa.
+
+## Etapas e entregas
+
+| Etapa | Dias | Entregável |
 |---|---|---|
-| `contrato` | Estrutura essencial (`CLAUDE.md`, `.claude/settings.json` com o plugin do núcleo, `.github/CODEOWNERS`, `context/README.md`, `context/99_conclusoes/`, `pyproject.toml`); nada versionado nas pastas de dados de `pipeline/data/` (`raw`, `interim`, `processed`, `external`); nenhum `.env` nem `CLAUDE.local.md` versionado; skills que o Claude Code carrega; erros de Python que quebram (sintaxe, nome indefinido); `pytest`; manifesto em sync (Rules 02 e 03) | **Barra o merge** |
-| `conselho` | Estrutura recomendada; estilo (`ruff check`, `ruff format`); raiz mínima (Rule 04); MLflow centralizado (Rule 01); plataforma isolada (Rule 06); convenções de nome; arquivos de `context/` acima de 8KB | **Só avisa** no PR |
+| 1. Imersão no Contexto | 1 | Dicionário de dados, unidade de previsão e métrica |
+| 2. Limpeza e Integração | 3 | Scripts em `ETL/` + relatório de qualidade |
+| 3. Análise Exploratória | 3 | `notebooks/01_analise_exploratoria.ipynb` → **Report 1** |
+| 4. Modelagem Preditiva | 7 | `notebooks/02_modelagem.ipynb` + modelo em `modelos/` |
+| 5. Interface Web | 2 | Aplicação Streamlit publicada com link |
+| 6. Validação e Apresentação | 1 | Política de manutenção → **Report 2** |
 
-Arquivo ou pasta nova, inclusive na raiz, não barra o merge: vira aviso, e quem decide a exceção é o coordenador, ao aprovar o PR. As rules de [`docs/rules/`](docs/rules/) continuam valendo; o motivo da divisão está na decisão 13 de [`docs/context/decisoes.md`](docs/context/decisoes.md).
+Detalhes de cada etapa no [roteiro](documentos-de-apoio/ROTEIRO.md).
 
-## Onde ficam as regras
+## Publicar a interface web
 
-**A leitura de [`docs/rules/`](docs/rules/) é obrigatória antes de qualquer alteração.**
+A interface é feita em [Streamlit](https://streamlit.io) (já incluído no
+`requirements.txt`). Para testar localmente:
 
-Documentação do **molde** (em [`docs/`](docs/)):
+```bash
+streamlit run <caminho-do-app>.py
+```
 
-- Contexto e arquitetura: [`docs/context/`](docs/context/)
-- Rules (o que pode/não pode): [`docs/rules/`](docs/rules/)
-- Guias por etapa: [`docs/guides/`](docs/guides/)
-- Decisões de arquitetura: [`docs/context/decisoes.md`](docs/context/decisoes.md)
-- Skills invocáveis (adicionar modelo, fonte, dependência, iniciar projeto…): [`.claude/skills/`](.claude/skills/)
+Para publicar no [Streamlit Community Cloud](https://streamlit.io/cloud):
 
-Contexto **deste projeto** (em [`.claude/`](.claude/), a preencher): problema de
-negócio, dados, glossário do domínio e decisões da cópia.
+1. Garanta que o app e o modelo final estão na `main`.
+2. Entre em share.streamlit.io com a conta do GitHub.
+3. **New app** → escolha o repositório, a branch `main` e o arquivo do app.
+4. Publique e coloque o link gerado na entrega da Etapa 5.
 
-> `.claude/` é uma pasta oculta — use `ls -a` para enxergá-la.
+A tela deve ficar só no app; a lógica (limpeza, features, previsão) fica nos scripts do
+projeto, para que a interface aplique exatamente o mesmo tratamento do treino.
 
-## Estrutura
+## Equipe
 
-Ver [`docs/context/arquitetura.md`](docs/context/arquitetura.md) para a estrutura-alvo
-completa e os invariantes.
-
----
-
-<!-- PREENCHER: seção de contato/responsáveis do projeto, se aplicável. -->
+- 2 consultores de dados (a dupla de trainees)
+- 1 validador técnico, que aprova os PRs ([`CODEOWNERS`](.github/CODEOWNERS))

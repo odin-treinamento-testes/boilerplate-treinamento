@@ -1,0 +1,1 @@
+# caso necessite de tratamento específico para antes da análise exploratória, faça aqui.

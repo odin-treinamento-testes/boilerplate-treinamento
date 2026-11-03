@@ -1,68 +1,31 @@
-# --- Python ---
-__pycache__/
-*.py[cod]
-*$py.class
-*.egg-info/
-.eggs/
-build/
-dist/
-.installed.cfg
-*.egg
+# --- Dados do cliente: NUNCA vão para o git ---
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+*.csv
+*.xlsx
+*.parquet
 
-# --- Ambientes virtuais ---
+# --- Ambiente virtual ---
 .venv/
 venv/
-env/
-ENV/
 
-# --- uv ---
-# uv.lock É versionado (fonte única de dependências). Não ignorar.
-.uv_cache/
-
-# --- Caches / ferramentas ---
-.cache/
+# --- Python / caches ---
+__pycache__/
+*.py[cod]
 .pytest_cache/
 .ruff_cache/
-.mypy_cache/
 .ipynb_checkpoints/
-.coverage
-.coverage.*
-htmlcov/
 
-# --- MLflow ---
-mlruns/
-mlartifacts/
-mlflow.db
-mlflow.db-journal
-
-# --- Dados ---
-pipeline/data/raw/
-pipeline/data/interim/
-pipeline/data/processed/
-pipeline/data/external/
-*.parquet
-*.csv
-*.feather
-
-# --- Segredos / ambiente ---
+# --- Segredos ---
 .env
 .env.*
-!.env.example
-*.pem
-*.key
 
-# --- Notebooks pesados / outputs ---
-*.ckpt
-*.pkl
-*.joblib
-*.h5
-
-# --- SO / editores ---
+# --- Sistema / editores ---
 .DS_Store
 Thumbs.db
 .idea/
 .vscode/
-*.swp
 
-# Arquivo pessoal do Claude Code: nunca versionar
-CLAUDE.local.md
+# models/modelo.joblib É versionado de propósito: a interface web publicada precisa dele.
