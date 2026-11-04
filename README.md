@@ -35,6 +35,7 @@ problema até um modelo publicado numa interface web.
 │   ├── 01_analise_exploratoria.ipynb    # Etapa 3 (Report 1)
 │   └── 02_modelagem.ipynb               # Etapa 4
 ├── modelos/                             # modelo final treinado
+├── tests/                               # testes que o CI roda (python -m pytest)
 ├── requirements.txt                     # todas as dependências do projeto
 └── .github/
     └── workflows/ci.yml                 # verificações automáticas
