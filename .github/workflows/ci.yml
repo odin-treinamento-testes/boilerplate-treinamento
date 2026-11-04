@@ -1,9 +1,8 @@
-# Roda a cada Pull Request e a cada push na main.
-# Faz o mesmo que você roda na sua máquina antes de abrir o PR: python -m pytest
+# Roda a cada push na main.
+# Faz o mesmo que você roda na sua máquina antes de subir: python -m pytest
 name: CI
 
 on:
-  pull_request:
   push:
     branches: [main]
 

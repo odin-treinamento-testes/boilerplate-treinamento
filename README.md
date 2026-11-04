@@ -37,8 +37,6 @@ problema até um modelo publicado numa interface web.
 ├── modelos/                             # modelo final treinado
 ├── requirements.txt                     # todas as dependências do projeto
 └── .github/
-    ├── CODEOWNERS                       # time de validadores aprova os PRs
-    ├── pull_request_template.md         # checklist de todo PR
     └── workflows/ci.yml                 # verificações automáticas
 ```
 
@@ -83,34 +81,42 @@ Depois, coloque os arquivos da base bruta recebidos do cliente em `dados/extraí
 > No macOS/Linux, se `python` não existir, use `python3`.
 
 Precisa de uma biblioteca nova? Adicione-a ao [`requirements.txt`](requirements.txt), uma
-por linha, **no mesmo PR** que passa a usá-la.
+por linha, **no mesmo commit** que passa a usá-la.
 
 ## Como trabalhar
 
-1. Crie uma branch para a etapa ou tarefa: `git checkout -b etapa-2-limpeza`.
+A equipe trabalha direto na `main`.
+
+1. Antes de começar, traga o que a sua dupla já subiu: `git pull`.
 2. Desenvolva seguindo o [roteiro](documentos-de-apoio/ROTEIRO.md).
-3. Antes de abrir o PR:
+3. Antes de subir:
    ```bash
    python -m pytest
    ```
    e rode cada notebook alterado do início ao fim (*Kernel → Restart & Run All*).
-4. Abra o PR para a `main` e preencha o checklist do template.
-5. O PR só entra depois de aprovado pelo time de validadores. **Uma etapa só está pronta
-   quando o PR dela foi aprovado.**
+4. Commit e push na `main`:
+   ```bash
+   git add <arquivos>
+   git commit -m "<o que mudou>"
+   git push
+   ```
+   Se o push for recusado, a sua dupla subiu algo antes: `git pull` e push de novo.
+5. Ao fim de cada etapa, avise o validador. **Uma etapa só está pronta quando o validador
+   aprovou o entregável dela.**
 
 ### O que o CI verifica
 
-A cada PR e a cada push na `main`, o GitHub Actions ([`ci.yml`](.github/workflows/ci.yml)):
+A cada push na `main`, o GitHub Actions ([`ci.yml`](.github/workflows/ci.yml)):
 
 | Verificação | Se falhar |
 |---|---|
-| Nenhum arquivo `.csv`, `.xlsx` ou `.parquet` versionado | Barra o merge |
-| `python -m pytest` passa | Barra o merge |
+| Nenhum arquivo `.csv`, `.xlsx` ou `.parquet` versionado | O commit fica com ❌ no GitHub: corrija e suba de novo |
+| `python -m pytest` passa | O commit fica com ❌ no GitHub: corrija e suba de novo |
 
 ## Regras do repositório
 
 - **Dados do cliente nunca entram no git.** O [`.gitignore`](.gitignore) ignora `.csv`,
-  `.xlsx` e `.parquet`, e o CI barra o PR se algum escapar.
+  `.xlsx` e `.parquet`, e o CI acusa se algum escapar.
 - **Segredos nunca entram no git** (`.env` e afins já estão ignorados).
 - **Limpeza é script, não notebook.** O tratamento final mora em `ETL/`.
 - **Notebooks precisam rodar do zero.** Nada de célula que depende de estado escondido.
@@ -154,4 +160,4 @@ projeto, para que a interface aplique exatamente o mesmo tratamento do treino.
 ## Equipe
 
 - 2 consultores de dados (a dupla de trainees)
-- 1 validador técnico, que aprova os PRs ([`CODEOWNERS`](.github/CODEOWNERS))
+- 1 validador técnico, que aprova o entregável de cada etapa

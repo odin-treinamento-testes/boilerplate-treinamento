@@ -1,7 +1,7 @@
 # Roteiro do projeto: as 6 etapas
 
 Cada etapa tem: o objetivo, o que fazer, **onde mexer no repositório** e o critério de
-**pronto**. Uma etapa só está pronta quando o PR dela foi aprovado pelo validador.
+**pronto**. Uma etapa só está pronta quando o validador aprovou o entregável dela.
 
 Prazo total: **17 dias úteis**.
 

@@ -61,4 +61,4 @@ Base bruta (6 tabelas) → Limpeza e integração → Base de modelagem (máquin
 
 - **17 dias úteis** (~3,5 semanas). Etapas: 1 dia · 3 · 3 · 7 · 2 · 1.
 - **Report 1** ao fim da Análise Exploratória. **Report 2** na Apresentação Final.
-- Equipe: 2 consultores de dados + 1 validador técnico (aprova os PRs).
+- Equipe: 2 consultores de dados + 1 validador técnico (aprova o entregável de cada etapa).

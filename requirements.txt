@@ -1,5 +1,5 @@
 # Dependências do projeto. Instalar com: pip install -r requirements.txt
-# Precisa de biblioteca nova? Adicione aqui (uma por linha) no mesmo PR que a usa.
+# Precisa de biblioteca nova? Adicione aqui (uma por linha) no mesmo commit que a usa.
 
 # dados e modelagem
 pandas>=2.2
